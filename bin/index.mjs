@@ -24,7 +24,7 @@ commander.command("peek").action(async () => {
 
   if (!head) return console.log(colors.red("Nothing to see here!"));
 
-  console.log(head);
+  console.log(colors.green(head));
 });
 
 commander.command("pop").action(async () => {
