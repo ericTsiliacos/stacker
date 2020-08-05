@@ -3,6 +3,7 @@
 import commander from "commander";
 import { writeFile, readFile } from "fs/promises";
 import colors from "colors/safe.js";
+import AsciiTree from "oo-ascii-tree";
 
 commander.command("push <message>").action(async message => {
   try {
@@ -16,7 +17,7 @@ commander.command("push <message>").action(async message => {
 
 commander.command("init").action(reset);
 
-commander.command("reset").action(reset);
+commander.command("clear").action(reset);
 
 commander.command("peek").action(async () => {
   const [head] = await storage();
@@ -33,7 +34,7 @@ commander.command("pop").action(async () => {
 
   try {
     await writeFile(storageFileName(), JSON.stringify(rest));
-    console.log("Pop:", head);
+    console.log(head);
   } catch (err) {
     console.error(err);
   }
@@ -41,11 +42,18 @@ commander.command("pop").action(async () => {
 
 commander.command("stack").action(async () => {
   const data = await storage();
-  const items = [].concat(...data.reverse().map(e => ["^\n|", e])).slice(1);
-  items.forEach(item => console.log(item));
+  const tree = buildTreeGraph(data);
+  console.log(tree.toString());
 });
 
 commander.parse(process.argv);
+
+function buildTreeGraph(messages) {
+  const [root, ...rest] = messages.reverse();
+  return root
+    ? new AsciiTree.AsciiTree(root, buildTreeGraph(rest))
+    : new AsciiTree.AsciiTree();
+}
 
 async function reset() {
   await writeFile(storageFileName(), JSON.stringify([]));

@@ -14,8 +14,6 @@
   "dependencies": {
     "colors": "^1.4.0",
     "commander": "^2.19.0",
-    "firstline": "^2.0.2",
-    "prepend": "^1.0.2",
-    "simple-git": "^1.132.0"
+    "oo-ascii-tree": "^1.10.0"
   }
 }
