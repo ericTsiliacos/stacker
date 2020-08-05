@@ -1,0 +1,21 @@
+{
+  "name": "stacker",
+  "version": "1.0.0",
+  "description": "",
+  "bin": {
+    "stacker": "./bin/index.mjs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "commander": "^2.19.0",
+    "firstline": "^2.0.2",
+    "prepend": "^1.0.2",
+    "simple-git": "^1.132.0"
+  }
+}
