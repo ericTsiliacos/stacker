@@ -49,7 +49,7 @@ commander.command("stack").action(async () => {
 commander.parse(process.argv);
 
 function buildTreeGraph(messages) {
-  const [root, ...rest] = messages.reverse();
+  const [root, ...rest] = messages;
   return root
     ? new AsciiTree.AsciiTree(root, buildTreeGraph(rest))
     : new AsciiTree.AsciiTree();
