@@ -41,7 +41,7 @@ As you complete tasks, pop them off the stack to see the next one.
 $ stacker pop
 ```
 
-You can always be reminded what you're currently working on.
+You can always be reminded of what you're currently working on.
 
 
 ```shell
