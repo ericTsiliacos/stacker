@@ -24,7 +24,7 @@ program.command("peek").action(async () => {
 
   if (!head) return console.log(colors.red("Nothing to see here!"));
 
-  console.log(colors.green(head));
+  console.log(`🆕 ${head}`);
 });
 
 program.command("pop").action(async () => {
@@ -50,9 +50,17 @@ program.command("pop").action(async () => {
 program.command("stack").action(displayStack);
 
 async function displayStack() {
-  const data = await storage();
-  const tree = buildTreeGraph(data);
-  console.log(tree.toString());
+  try {
+    const [head, ...rest] = await storage();
+
+    if (!head) return;
+
+    const data = [`🆕 ${head}`, ...rest];
+    const tree = buildTreeGraph(data);
+    console.log(tree.toString());
+  } catch (err) {
+    console.error(colors.red("Please, initialize stacker: stacker init"));
+  }
 }
 
 program.parse(process.argv);
