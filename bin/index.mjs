@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-import commander from "commander";
+import program from "commander";
 import { writeFile, readFile } from "fs/promises";
 import colors from "colors/safe.js";
 import AsciiTree from "oo-ascii-tree";
 
-commander.command("push <message>").action(async message => {
+program.command("push <message>").action(async message => {
   try {
     const data = await storage();
 
@@ -15,11 +15,11 @@ commander.command("push <message>").action(async message => {
   }
 });
 
-commander.command("init").action(reset);
+program.command("init").action(reset);
 
-commander.command("clear").action(reset);
+program.command("clear").action(reset);
 
-commander.command("peek").action(async () => {
+program.command("peek").action(async () => {
   const [head] = await storage();
 
   if (!head) return console.log(colors.red("Nothing to see here!"));
@@ -27,7 +27,7 @@ commander.command("peek").action(async () => {
   console.log(colors.green(head));
 });
 
-commander.command("pop").action(async () => {
+program.command("pop").action(async () => {
   const [head, ...rest] = await storage();
 
   if (!head) return console.log(colors.red("Nothing to pop!"));
@@ -47,13 +47,13 @@ commander.command("pop").action(async () => {
   }
 });
 
-commander.command("stack").action(async () => {
+program.command("stack").action(async () => {
   const data = await storage();
   const tree = buildTreeGraph(data);
   console.log(tree.toString());
 });
 
-commander.parse(process.argv);
+program.parse(process.argv);
 
 function buildTreeGraph(messages) {
   const [root, ...rest] = messages;
