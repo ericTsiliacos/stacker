@@ -57,7 +57,7 @@ async function displayStack() {
 
     const data = [`🆕 ${head}`, ...rest];
     const tree = buildTreeGraph(data);
-    console.log(tree.toString());
+    console.log(`\n${tree.toString()}`);
   } catch (err) {
     console.error(colors.red("Please, initialize stacker: stacker init"));
   }
