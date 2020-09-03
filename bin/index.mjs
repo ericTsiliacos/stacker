@@ -47,13 +47,19 @@ program.command("pop").action(async () => {
   }
 });
 
-program.command("stack").action(async () => {
+program.command("stack").action(displayStack);
+
+async function displayStack() {
   const data = await storage();
   const tree = buildTreeGraph(data);
   console.log(tree.toString());
-});
+}
 
 program.parse(process.argv);
+
+if (process.argv.length < 3) {
+  displayStack();
+}
 
 function buildTreeGraph(messages) {
   const [root, ...rest] = messages;
