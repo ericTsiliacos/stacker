@@ -35,6 +35,9 @@ commander.command("pop").action(async () => {
   try {
     await writeFile(storageFileName(), JSON.stringify(rest));
     console.log(head);
+
+    if (rest.length === 0)
+      console.log(`\n🎉 ${colors.rainbow("All done!")} 🎉`);
   } catch (err) {
     console.error(err);
   }
