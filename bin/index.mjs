@@ -4,6 +4,8 @@ import program from "commander";
 import { writeFile, readFile } from "fs/promises";
 import colors from "colors/safe.js";
 import AsciiTree from "oo-ascii-tree";
+import { mapResult, either } from "./result.mjs";
+import { AsyncIO, liftF, props, pipe } from "./async_io.mjs";
 
 program.command("push <message>").action(async message => {
   try {
@@ -19,13 +21,21 @@ program.command("init").action(reset);
 
 program.command("clear").action(reset);
 
-program.command("peek").action(async () => {
-  const [head] = await storage();
+const emptyMessage = () => colors.red("Nothing to see here!");
 
-  if (!head) return console.log(colors.red("Nothing to see here!"));
+const initializeMessage = () =>
+  colors.red("Please, initialize stacker: stacker init");
 
-  console.log(`🆕 ${head}`);
-});
+const latestMessage = message => (message ? `🆕 ${message}` : emptyMessage());
+
+const peek = (getStorage, display) =>
+  getStorage()
+    .then(mapResult(props(0)))
+    .then(pipe(either(initializeMessage, latestMessage), display));
+
+program
+  .command("peek")
+  .action(() => peek(AsyncIO.from(getStorage), liftF(console.log)).run());
 
 program.command("pop").action(async () => {
   const [head, ...rest] = await storage();
@@ -83,6 +93,10 @@ async function reset() {
 async function storage() {
   const data = await readFile(storageFileName());
   return JSON.parse(data);
+}
+
+async function getStorage() {
+  return readFile(storageFileName()).then(data => JSON.parse(data));
 }
 
 function storageFileName() {
