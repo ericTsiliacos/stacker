@@ -5,16 +5,26 @@ import { writeFile, readFile } from "fs/promises";
 import colors from "colors/safe.js";
 import AsciiTree from "oo-ascii-tree";
 import { mapResult, either } from "./result.mjs";
-import { AsyncIO, liftF, props, pipe } from "./async_io.mjs";
+import { from, liftF, props, pipe } from "./async_io.mjs";
+
+const log = console.log;
+
+const initializeMessage = () =>
+  colors.red("Please, initialize stacker: stacker init");
+
+const push = message => stack => [message, ...stack];
+
+const writeData = data => writeFile(storageFileName(), JSON.stringify(data));
 
 program.command("push <message>").action(async message => {
-  try {
-    const data = await storage();
-
-    await writeFile(storageFileName(), JSON.stringify([message, ...data]));
-  } catch (error) {
-    console.log(error);
-  }
+  from(getStorage)()
+    .then(
+      either(
+        pipe(initializeMessage, liftF(log)),
+        pipe(push(message), liftF(writeData))
+      )
+    )
+    .run();
 });
 
 program.command("init").action(reset);
@@ -23,19 +33,14 @@ program.command("clear").action(reset);
 
 const emptyMessage = () => colors.red("Nothing to see here!");
 
-const initializeMessage = () =>
-  colors.red("Please, initialize stacker: stacker init");
-
 const latestMessage = message => (message ? `🆕 ${message}` : emptyMessage());
 
-const peek = (getStorage, display) =>
-  getStorage()
+program.command("peek").action(() =>
+  from(getStorage)()
     .then(mapResult(props(0)))
-    .then(pipe(either(initializeMessage, latestMessage), display));
-
-program
-  .command("peek")
-  .action(() => peek(AsyncIO.from(getStorage), liftF(console.log)).run());
+    .then(pipe(either(initializeMessage, latestMessage), liftF(log)))
+    .run()
+);
 
 program.command("pop").action(async () => {
   const [head, ...rest] = await storage();
