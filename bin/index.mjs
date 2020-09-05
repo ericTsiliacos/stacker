@@ -7,21 +7,22 @@ import AsciiTree from "oo-ascii-tree";
 import { mapResult, either } from "./result.mjs";
 import { from, liftF, props, pipe } from "./async_io.mjs";
 
-const log = console.log;
+const display = () => liftF(console.log);
 
-const initializeMessage = () =>
+const uninitializedMessage = () =>
   colors.red("Please, initialize stacker: stacker init");
 
-const push = message => stack => [message, ...stack];
+const additional = message => stack => [message, ...stack];
 
-const writeData = data => writeFile(storageFileName(), JSON.stringify(data));
+const dataWriter = () =>
+  liftF(data => writeFile(storageFileName(), JSON.stringify(data)));
 
 program.command("push <message>").action(async message => {
-  from(getStorage)()
+  from(storage)()
     .then(
       either(
-        pipe(initializeMessage, liftF(log)),
-        pipe(push(message), liftF(writeData))
+        pipe(uninitializedMessage, display()),
+        pipe(additional(message), dataWriter())
       )
     )
     .run();
@@ -36,9 +37,9 @@ const emptyMessage = () => colors.red("Nothing to see here!");
 const latestMessage = message => (message ? `🆕 ${message}` : emptyMessage());
 
 program.command("peek").action(() =>
-  from(getStorage)()
+  from(storage)()
     .then(mapResult(props(0)))
-    .then(pipe(either(initializeMessage, latestMessage), liftF(log)))
+    .then(pipe(either(uninitializedMessage, latestMessage), display()))
     .run()
 );
 
@@ -96,11 +97,6 @@ async function reset() {
 }
 
 async function storage() {
-  const data = await readFile(storageFileName());
-  return JSON.parse(data);
-}
-
-async function getStorage() {
   return readFile(storageFileName()).then(data => JSON.parse(data));
 }
 
