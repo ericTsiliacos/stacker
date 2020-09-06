@@ -2,30 +2,18 @@
 
 import program from "commander";
 import { writeFile, readFile } from "fs/promises";
-import colors from "colors/safe.js";
 import AsciiTree from "oo-ascii-tree";
 import { mapResult, either, or } from "./result.mjs";
 import { Maybe, maybe, orJust } from "./maybe.mjs";
 import { asyncio, liftF, props, pipe } from "./async_io.mjs";
+import { uninitialization, emptyStack } from "./copy.mjs";
+import { error, latest } from "./styles.mjs";
+import { additional } from "./stack.mjs";
+import { fileSystem } from "./fileSystem.mjs";
 
 const forMaybeIndex = index => obj => Maybe(props(index)(obj));
 
 const show = transform => value => liftF(console.log)(transform(value));
-
-const error = colors.red;
-
-const uninitialization = () => "Please, initialize stacker: stacker init";
-
-const emptyStack = () => "Nothing to see here!";
-
-const latest = value => `🆕 ${value}`;
-
-const additional = message => stack => [message, ...stack];
-
-const fileSystem = ({ at: filePath }) => ({
-  read: async () => await readFile(filePath),
-  write: async data => await writeFile(filePath, data),
-});
 
 const get = parser => ({ from }) => () =>
   from.read().then(data => parser.parse(data));
