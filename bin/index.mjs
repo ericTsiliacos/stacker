@@ -8,11 +8,14 @@ import { mapResult, either, or } from "./result.mjs";
 import { from as getDataFrom, liftF, props as forIndex } from "./async_io.mjs";
 
 const show = transform => value => liftF(console.log)(transform(value));
+
 const write = (dataTransformer, { to }) => data =>
   liftF(writeFile(to, JSON.stringify(dataTransformer(data))));
 
-const uninitializedMessage = () =>
-  colors.red("Please, initialize stacker: stacker init");
+const uninitialized = transform => () =>
+  transform("Please, initialize stacker: stacker init");
+
+const error = colors.red;
 
 const additional = message => stack => [message, ...stack];
 
@@ -20,7 +23,7 @@ program.command("push <message>").action(async message => {
   getDataFrom(storage)()
     .then(
       either(
-        show(uninitializedMessage),
+        show(uninitialized(error)),
         or(write(additional(message), { to: storageFileName() }))
       )
     )
@@ -38,7 +41,7 @@ const latestMessage = message => (message ? `🆕 ${message}` : emptyMessage());
 program.command("peek").action(() =>
   getDataFrom(storage)()
     .then(mapResult(forIndex(0)))
-    .then(show(either(uninitializedMessage, or(latestMessage))))
+    .then(show(either(uninitialized(error), or(latestMessage))))
     .run()
 );
 
