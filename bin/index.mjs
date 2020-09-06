@@ -5,7 +5,7 @@ import { writeFile, readFile } from "fs/promises";
 import colors from "colors/safe.js";
 import AsciiTree from "oo-ascii-tree";
 import { mapResult, either, or } from "./result.mjs";
-import { from as getDataFrom, liftF, props as forIndex } from "./async_io.mjs";
+import { asyncio, liftF, props as forIndex } from "./async_io.mjs";
 
 const show = transform => value => liftF(console.log)(transform(value));
 
@@ -19,8 +19,15 @@ const error = colors.red;
 
 const additional = message => stack => [message, ...stack];
 
+const fileSystem = ({ at }) => ({
+  read: async () => await readFile(at),
+});
+
+const get = parser => ({ from }) => () =>
+  from.read().then(data => parser.parse(data));
+
 program.command("push <message>").action(async message => {
-  getDataFrom(storage)()
+  asyncio(get(JSON)({ from: fileSystem({ at: filePath() }) }))()
     .then(
       either(
         show(uninitialized(error)),
@@ -39,7 +46,7 @@ const emptyMessage = () => colors.red("Nothing to see here!");
 const latestMessage = message => (message ? `🆕 ${message}` : emptyMessage());
 
 program.command("peek").action(() =>
-  getDataFrom(storage)()
+  asyncio(get(JSON)({ from: fileSystem({ at: filePath() }) }))()
     .then(mapResult(forIndex(0)))
     .then(show(either(uninitialized(error), or(latestMessage))))
     .run()
@@ -103,6 +110,10 @@ async function storage() {
 }
 
 function storageFileName() {
+  return `${cwd()}/.stacker.json`;
+}
+
+function filePath() {
   return `${cwd()}/.stacker.json`;
 }
 

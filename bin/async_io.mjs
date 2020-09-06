@@ -41,7 +41,7 @@ const AsyncIO = {
   of: thunk => AsyncIO.chaining(thunk),
 };
 
-const from = thunk => (...values) =>
+const asyncio = thunk => (...values) =>
   AsyncIO.chaining(liftPromise(liftF(thunk)(...values)));
 
-export { AsyncIO, liftF, compose, pipe, props, puts, from };
+export { AsyncIO, liftF, compose, pipe, props, puts, asyncio };
