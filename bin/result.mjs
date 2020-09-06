@@ -13,4 +13,6 @@ const mapResult = f => result => result.map(f);
 const either = (left, right) => result =>
   result.left ? left(result.left) : right(result.right);
 
-export { Result, mapResult, either };
+const or = f => value => f(value);
+
+export { Result, mapResult, either, or };
