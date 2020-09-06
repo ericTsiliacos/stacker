@@ -5,27 +5,22 @@ import { writeFile, readFile } from "fs/promises";
 import AsciiTree from "oo-ascii-tree";
 import { mapResult, either, or } from "./result.mjs";
 import { Maybe, maybe, orJust } from "./maybe.mjs";
-import { asyncio, liftF, props, pipe } from "./async_io.mjs";
+import { asyncio, liftF, props, pipe, into } from "./async_io.mjs";
 import { uninitialization, emptyStack } from "./copy.mjs";
 import { error, latest } from "./styles.mjs";
 import { additional, initial } from "./stack.mjs";
 import { fileSystem } from "./fileSystem.mjs";
+import { get, write } from "./repository.mjs";
 
 const forMaybeIndex = index => obj => Maybe(props(index)(obj));
 
-const show = transform => value => liftF(console.log)(transform(value));
-
-const get = parser => ({ from }) => () =>
-  from.read().then(data => parser.parse(data));
-
-const write = (dataTransformer, parser, { to }) => data =>
-  to.write(parser.stringify(dataTransformer(data)));
+const displayTerminal = liftF(console.log);
 
 program.command("push <message>").action(async message => {
   asyncio(get(JSON)({ from: fileSystem({ at: filePath() }) }))()
     .then(
       either(
-        show(pipe(uninitialization, error)),
+        pipe(uninitialization, error, into(displayTerminal)),
         or(
           liftF(
             write(additional(message), JSON, {
@@ -48,11 +43,12 @@ program.command("peek").action(() =>
   asyncio(get(JSON)({ from: fileSystem({ at: filePath() }) }))()
     .then(mapResult(forMaybeIndex(0)))
     .then(
-      show(
+      pipe(
         either(
           pipe(uninitialization, error),
           or(maybe(pipe(emptyStack, error), orJust(latest)))
-        )
+        ),
+        into(displayTerminal)
       )
     )
     .run()

@@ -10,6 +10,8 @@ const pipe = (...xs) => x =>
     x => x
   )(x);
 
+const into = x => x;
+
 const props = (...properties) => x =>
   properties.reduce((accu, curr) => accu[curr], x);
 
@@ -44,4 +46,4 @@ const AsyncIO = {
 const asyncio = thunk => (...values) =>
   AsyncIO.chaining(liftPromise(liftF(thunk)(...values)));
 
-export { AsyncIO, liftF, compose, pipe, props, puts, asyncio };
+export { AsyncIO, liftF, compose, pipe, props, puts, asyncio, into };
