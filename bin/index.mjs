@@ -5,12 +5,9 @@ import { writeFile, readFile } from "fs/promises";
 import colors from "colors/safe.js";
 import AsciiTree from "oo-ascii-tree";
 import { mapResult, either, or } from "./result.mjs";
-import { asyncio, liftF, props as forIndex } from "./async_io.mjs";
+import { asyncio, liftF, props as forIndex, pipe } from "./async_io.mjs";
 
 const show = transform => value => liftF(console.log)(transform(value));
-
-const write = (dataTransformer, { to }) => data =>
-  liftF(writeFile(to, JSON.stringify(dataTransformer(data))));
 
 const uninitialized = transform => () =>
   transform("Please, initialize stacker: stacker init");
@@ -21,17 +18,26 @@ const additional = message => stack => [message, ...stack];
 
 const fileSystem = ({ at: filePath }) => ({
   read: async () => await readFile(filePath),
+  write: async data => await writeFile(filePath, data),
 });
 
 const get = parser => ({ from }) => () =>
   from.read().then(data => parser.parse(data));
+
+const write = (dataTransformer, parser) => ({ to }) => data =>
+  liftF(to.write(parser.stringify(dataTransformer(data))));
 
 program.command("push <message>").action(async message => {
   asyncio(get(JSON)({ from: fileSystem({ at: filePath() }) }))()
     .then(
       either(
         show(uninitialized(error)),
-        or(write(additional(message), { to: storageFileName() }))
+        or(
+          write(
+            additional(message),
+            JSON
+          )({ to: fileSystem({ at: filePath() }) })
+        )
       )
     )
     .run();
