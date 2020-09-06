@@ -8,7 +8,7 @@ import { Maybe, maybe, orJust } from "./maybe.mjs";
 import { asyncio, liftF, props, pipe } from "./async_io.mjs";
 import { uninitialization, emptyStack } from "./copy.mjs";
 import { error, latest } from "./styles.mjs";
-import { additional } from "./stack.mjs";
+import { additional, initial } from "./stack.mjs";
 import { fileSystem } from "./fileSystem.mjs";
 
 const forMaybeIndex = index => obj => Maybe(props(index)(obj));
@@ -19,7 +19,7 @@ const get = parser => ({ from }) => () =>
   from.read().then(data => parser.parse(data));
 
 const write = (dataTransformer, parser, { to }) => data =>
-  liftF(to.write(parser.stringify(dataTransformer(data))));
+  to.write(parser.stringify(dataTransformer(data)));
 
 program.command("push <message>").action(async message => {
   asyncio(get(JSON)({ from: fileSystem({ at: filePath() }) }))()
@@ -27,14 +27,18 @@ program.command("push <message>").action(async message => {
       either(
         show(pipe(uninitialization, error)),
         or(
-          write(additional(message), JSON, {
-            to: fileSystem({ at: filePath() }),
-          })
+          liftF(
+            write(additional(message), JSON, {
+              to: fileSystem({ at: filePath() }),
+            })
+          )
         )
       )
     )
     .run();
 });
+
+const reset = write(initial, JSON, { to: fileSystem({ at: filePath() }) });
 
 program.command("init").action(reset);
 
@@ -101,10 +105,6 @@ function buildTreeGraph(messages) {
   return root
     ? new AsciiTree.AsciiTree(root, buildTreeGraph(rest))
     : new AsciiTree.AsciiTree();
-}
-
-async function reset() {
-  await writeFile(storageFileName(), JSON.stringify([]));
 }
 
 async function storage() {

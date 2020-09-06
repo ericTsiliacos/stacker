@@ -1,3 +1,5 @@
 const additional = message => stack => [message, ...stack];
 
-export { additional };
+const initial = () => [];
+
+export { additional, initial };
