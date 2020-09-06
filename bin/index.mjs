@@ -6,7 +6,7 @@ import colors from "colors/safe.js";
 import AsciiTree from "oo-ascii-tree";
 import { mapResult, either, or } from "./result.mjs";
 import { Maybe, maybe, orJust } from "./maybe.mjs";
-import { asyncio, liftF, props } from "./async_io.mjs";
+import { asyncio, liftF, props, pipe } from "./async_io.mjs";
 
 const forMaybeIndex = index => obj => Maybe(props(index)(obj));
 
@@ -14,12 +14,11 @@ const show = transform => value => liftF(console.log)(transform(value));
 
 const error = colors.red;
 
-const uninitialized = transform => () =>
-  transform("Please, initialize stacker: stacker init");
+const uninitialization = () => "Please, initialize stacker: stacker init";
 
-const emptyStack = transform => () => transform("Nothing to see here!");
+const emptyStack = () => "Nothing to see here!";
 
-const latestMessage = message => `🆕 ${message}`;
+const latest = value => `🆕 ${value}`;
 
 const additional = message => stack => [message, ...stack];
 
@@ -38,7 +37,7 @@ program.command("push <message>").action(async message => {
   asyncio(get(JSON)({ from: fileSystem({ at: filePath() }) }))()
     .then(
       either(
-        show(uninitialized(error)),
+        show(pipe(uninitialization, error)),
         or(
           write(
             additional(message),
@@ -60,8 +59,8 @@ program.command("peek").action(() =>
     .then(
       show(
         either(
-          uninitialized(error),
-          or(maybe(emptyStack(error), orJust(latestMessage)))
+          pipe(uninitialization, error),
+          or(maybe(pipe(emptyStack, error), orJust(latest)))
         )
       )
     )
