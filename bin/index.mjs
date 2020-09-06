@@ -19,8 +19,8 @@ const error = colors.red;
 
 const additional = message => stack => [message, ...stack];
 
-const fileSystem = ({ at }) => ({
-  read: async () => await readFile(at),
+const fileSystem = ({ at: filePath }) => ({
+  read: async () => await readFile(filePath),
 });
 
 const get = parser => ({ from }) => () =>
