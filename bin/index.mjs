@@ -18,7 +18,7 @@ const show = transform => value => liftF(console.log)(transform(value));
 const get = parser => ({ from }) => () =>
   from.read().then(data => parser.parse(data));
 
-const write = (dataTransformer, parser) => ({ to }) => data =>
+const write = (dataTransformer, parser, { to }) => data =>
   liftF(to.write(parser.stringify(dataTransformer(data))));
 
 program.command("push <message>").action(async message => {
@@ -27,10 +27,9 @@ program.command("push <message>").action(async message => {
       either(
         show(pipe(uninitialization, error)),
         or(
-          write(
-            additional(message),
-            JSON
-          )({ to: fileSystem({ at: filePath() }) })
+          write(additional(message), JSON, {
+            to: fileSystem({ at: filePath() }),
+          })
         )
       )
     )
