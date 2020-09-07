@@ -2,8 +2,8 @@
 
 import program from "commander";
 import AsciiTree from "oo-ascii-tree";
-import json from "./json.mjs";
-import fileSystem from "./fileSystem.mjs";
+import json from "./adapters/json.mjs";
+import fileSystem from "./adapters/fileSystem.mjs";
 import { writeFile, readFile } from "fs/promises";
 import { mapResult, either, or } from "./fp/result.mjs";
 import { maybe, orJust, forMaybeIndex } from "./fp/maybe.mjs";
@@ -11,7 +11,7 @@ import { asynchronously, liftF } from "./fp/async_io.mjs";
 import { pipe, into, an } from "./fp/pipe.mjs";
 import { uninitialization, emptyStack } from "./copy.mjs";
 import { error, latest } from "./styles.mjs";
-import { additional, initial } from "./stack.mjs";
+import { additional, initial } from "./domain/stack.mjs";
 import { get, write } from "./repository.mjs";
 
 const displayTerminal = liftF(console.log);
