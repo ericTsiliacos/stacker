@@ -1,8 +1,6 @@
 import { writeFile, readFile } from "fs/promises";
 
-const fileSystem = ({ at: filePath }) => ({
+export default ({ at: filePath }) => ({
   read: async () => await readFile(filePath),
   write: async data => await writeFile(filePath, data),
 });
-
-export { fileSystem };

@@ -1,3 +1,5 @@
+import props from "./props.mjs";
+
 const Maybe = value => ({ value });
 
 const maybe = (defaultValue, just) => maybe =>
@@ -5,4 +7,6 @@ const maybe = (defaultValue, just) => maybe =>
 
 const orJust = f => (...values) => f(values);
 
-export { Maybe, maybe, orJust };
+const forMaybeIndex = index => obj => Maybe(props(index)(obj));
+
+export { Maybe, maybe, orJust, forMaybeIndex };

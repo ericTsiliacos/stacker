@@ -1,29 +1,29 @@
 #!/usr/bin/env node
 
 import program from "commander";
-import { writeFile, readFile } from "fs/promises";
 import AsciiTree from "oo-ascii-tree";
-import { mapResult, either, or } from "./result.mjs";
-import { Maybe, maybe, orJust } from "./maybe.mjs";
-import { asyncio, liftF, props, pipe, into } from "./async_io.mjs";
+import json from "./json.mjs";
+import fileSystem from "./fileSystem.mjs";
+import { writeFile, readFile } from "fs/promises";
+import { mapResult, either, or } from "./fp/result.mjs";
+import { maybe, orJust, forMaybeIndex } from "./fp/maybe.mjs";
+import { asynchronously, liftF } from "./fp/async_io.mjs";
+import { pipe, into, an } from "./fp/pipe.mjs";
 import { uninitialization, emptyStack } from "./copy.mjs";
 import { error, latest } from "./styles.mjs";
 import { additional, initial } from "./stack.mjs";
-import { fileSystem } from "./fileSystem.mjs";
 import { get, write } from "./repository.mjs";
-
-const forMaybeIndex = index => obj => Maybe(props(index)(obj));
 
 const displayTerminal = liftF(console.log);
 
 program.command("push <message>").action(async message => {
-  asyncio(get(JSON)({ from: fileSystem({ at: filePath() }) }))()
+  asynchronously(get)(json(), { from: fileSystem({ at: filePath() }) })
     .then(
       either(
         pipe(uninitialization, error, into(displayTerminal)),
         or(
           liftF(
-            write(additional(message), JSON, {
+            write(additional(message), json(), {
               to: fileSystem({ at: filePath() }),
             })
           )
@@ -33,20 +33,20 @@ program.command("push <message>").action(async message => {
     .run();
 });
 
-const reset = write(initial, JSON, { to: fileSystem({ at: filePath() }) });
+const reset = write(initial, json(), { to: fileSystem({ at: filePath() }) });
 
 program.command("init").action(reset);
 
 program.command("clear").action(reset);
 
 program.command("peek").action(() =>
-  asyncio(get(JSON)({ from: fileSystem({ at: filePath() }) }))()
+  asynchronously(get)(json(), { from: fileSystem({ at: filePath() }) })
     .then(mapResult(forMaybeIndex(0)))
     .then(
       pipe(
         either(
-          pipe(uninitialization, error),
-          or(maybe(pipe(emptyStack, error), orJust(latest)))
+          an(uninitialization, error),
+          or(maybe(an(emptyStack, error), orJust(latest)))
         ),
         into(displayTerminal)
       )

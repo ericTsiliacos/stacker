@@ -1,7 +1,8 @@
-const get = parser => ({ from }) => () =>
-  from.read().then(data => parser.parse(data));
+import { pipe } from "./fp/pipe.mjs";
 
-const write = (dataTransformer, parser, { to }) => data =>
-  to.write(parser.stringify(dataTransformer(data)));
+const get = ({ decode }, { from: { read } }) => read().then(decode);
+
+const write = (transform, { encode }, { to: { write } }) =>
+  pipe(transform, encode, write);
 
 export { get, write };

@@ -2,21 +2,6 @@ import { Result } from "./result.mjs";
 
 const liftF = f => (...values) => () => f(...values);
 
-const compose = f => g => x => g(f(x));
-
-const pipe = (...xs) => x =>
-  xs.reduce(
-    (accu, curr) => compose(accu)(curr),
-    x => x
-  )(x);
-
-const into = x => x;
-
-const props = (...properties) => x =>
-  properties.reduce((accu, curr) => accu[curr], x);
-
-const puts = liftF(console.log);
-
 const liftPromise = f => () =>
   f()
     .then(value => Result({ right: value }))
@@ -43,7 +28,7 @@ const AsyncIO = {
   of: thunk => AsyncIO.chaining(thunk),
 };
 
-const asyncio = thunk => (...values) =>
+const asynchronously = thunk => (...values) =>
   AsyncIO.chaining(liftPromise(liftF(thunk)(...values)));
 
-export { AsyncIO, liftF, compose, pipe, props, puts, asyncio, into };
+export { AsyncIO, liftF, asynchronously };
