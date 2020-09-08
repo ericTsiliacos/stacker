@@ -58,9 +58,11 @@ function displayStack() {
         display(an(initialization, error)),
         or(maybe)(
           doNothing,
-          orJust(display)(
-            a(formatted, treeGraph, whoseTopMessageIs(labelled(newest)))
-          )
+          orJust(display)`\n${a(
+            formatted,
+            treeGraph,
+            whoseTopMessageIs(labelled(newest))
+          )}`
         )
       )
     )

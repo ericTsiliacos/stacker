@@ -1,6 +1,6 @@
 import AsciiTree from "oo-ascii-tree";
 
-const formatted = tree => `\n${tree.toString()}`;
+const formatted = tree => tree.toString();
 
 function treeGraph(messages) {
   const [root, ...rest] = messages;
