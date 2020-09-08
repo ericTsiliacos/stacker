@@ -1,6 +1,7 @@
 import { Result } from "./result.mjs";
+import { promisify } from "util";
 
-const liftF = f => (...values) => () => f(...values);
+const io = f => (...values) => () => f(...values);
 
 const liftPromise = f => () =>
   f()
@@ -9,26 +10,13 @@ const liftPromise = f => () =>
 
 const AsyncIO = {
   chaining: thunk => ({
-    then: f => AsyncIO.chaining(() => thunk().then(value => liftF(f)(value)())),
-    sequence: (...fs) =>
-      AsyncIO.chaining(() =>
-        thunk().then(value => fs.forEach(f => f(value)()))
-      ),
-    _sequence: (...fs) =>
-      AsyncIO.chaining(() => thunk().then(() => fs.forEach(f => f()))),
-    _thread_: f =>
-      AsyncIO.chaining(() =>
-        thunk().then(value => {
-          f();
-          return value;
-        })
-      ),
-    run: () => thunk().then(result => result()),
+    then: f => AsyncIO.chaining(() => thunk().then(value => f(value))),
+    run: () => thunk(),
   }),
   of: thunk => AsyncIO.chaining(thunk),
 };
 
 const asynchronously = thunk => (...values) =>
-  AsyncIO.chaining(liftPromise(liftF(thunk)(...values)));
+  AsyncIO.chaining(liftPromise(io(thunk)(...values)));
 
-export { AsyncIO, liftF, asynchronously };
+export { AsyncIO, io, asynchronously };

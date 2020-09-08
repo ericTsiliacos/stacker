@@ -7,26 +7,22 @@ import fileSystem from "./adapters/fileSystem.mjs";
 import { writeFile, readFile } from "fs/promises";
 import { mapResult, either, or } from "./fp/result.mjs";
 import { maybe, orJust, forMaybeIndex } from "./fp/maybe.mjs";
-import { asynchronously, liftF } from "./fp/async_io.mjs";
+import { asynchronously, io } from "./fp/async_io.mjs";
 import { pipe, into, an } from "./fp/pipe.mjs";
-import { uninitialization, emptyStack } from "./copy.mjs";
+import { initialization, emptyStack } from "./copy.mjs";
 import { error, latest } from "./styles.mjs";
 import { additional, initial } from "./domain/stack.mjs";
 import { get, write } from "./repository.mjs";
-
-const displayTerminal = liftF(console.log);
 
 program.command("push <message>").action(async message => {
   asynchronously(get)(json(), { from: fileSystem({ at: filePath() }) })
     .then(
       either(
-        pipe(uninitialization, error, into(displayTerminal)),
+        pipe(initialization, error, into(console.log)),
         or(
-          liftF(
-            write(additional(message), json(), {
-              to: fileSystem({ at: filePath() }),
-            })
-          )
+          write(additional(message), json(), {
+            to: fileSystem({ at: filePath() }),
+          })
         )
       )
     )
@@ -45,10 +41,10 @@ program.command("peek").action(() =>
     .then(
       pipe(
         either(
-          an(uninitialization, error),
+          an(initialization, error),
           or(maybe(an(emptyStack, error), orJust(latest)))
         ),
-        into(displayTerminal)
+        into(console.log)
       )
     )
     .run()
