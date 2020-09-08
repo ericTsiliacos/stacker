@@ -1,3 +1,5 @@
+import identity from "./identity.mjs";
+
 const Result = ({ left, right }) => {
   return Object.assign(
     {},
@@ -13,6 +15,6 @@ const mapResult = f => result => result.map(f);
 const either = (left, right) => result =>
   result.left ? left(result.left) : right(result.right);
 
-const or = f => value => f(value);
+const or = identity;
 
 export { Result, mapResult, either, or };

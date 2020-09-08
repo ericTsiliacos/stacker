@@ -1,19 +1,26 @@
 #!/usr/bin/env node
 
 import program from "commander";
-import AsciiTree from "oo-ascii-tree";
+import { treeGraph, formatted } from "./adapters/tree.mjs";
 import json from "./adapters/json.mjs";
 import fileSystem from "./adapters/fileSystem.mjs";
 import display from "./adapters/display.mjs";
+import colors from "colors/safe.js";
+import { a, an } from "./fp/pipe.mjs";
 import { writeFile, readFile } from "fs/promises";
 import { either, or } from "./fp/result.mjs";
-import { maybe, orJust, forMaybeIndex } from "./fp/maybe.mjs";
-import { asynchronously } from "./fp/async_io.mjs";
-import { an } from "./fp/pipe.mjs";
+import { fromNonEmptyList, maybe, orJust, forMaybeIndex } from "./fp/maybe.mjs";
+import { asynchronously, doNothing } from "./fp/async_io.mjs";
 import { initialization, emptyStack } from "./copy.mjs";
-import { error, newest } from "./styles.mjs";
-import { additional, initial } from "./domain/stack.mjs";
+import { error, newest, labelled } from "./styles.mjs";
+import { additional, initial, whoseTopMessageIs } from "./domain/stack.mjs";
 import { get, write } from "./repository.mjs";
+
+const resetTo = write(json(), { to: fileSystem({ at: filePath() }) });
+
+program.command("init").action(() => resetTo(initial()));
+
+program.command("clear").action(() => resetTo(initial()));
 
 program.command("push <message>").action(message => {
   asynchronously(get)(json(), { from: fileSystem({ at: filePath() }) })
@@ -27,12 +34,6 @@ program.command("push <message>").action(message => {
     .run();
 });
 
-const resetTo = write(json(), { to: fileSystem({ at: filePath() }) });
-
-program.command("init").action(() => resetTo(initial()));
-
-program.command("clear").action(() => resetTo(initial()));
-
 program.command("peek").action(() =>
   asynchronously(get)(json(), { from: fileSystem({ at: filePath() }) })
     .map(forMaybeIndex(0))
@@ -40,12 +41,35 @@ program.command("peek").action(() =>
       display(
         either(
           an(initialization, error),
-          or(maybe(an(emptyStack, error), orJust(newest)))
+          or(maybe(an(emptyStack, error), orJust(labelled(newest))))
         )
       )
     )
     .run()
 );
+
+program.command("stack").action(displayStack);
+
+function displayStack() {
+  asynchronously(get)(json(), { from: fileSystem({ at: filePath() }) })
+    .map(fromNonEmptyList)
+    .then(
+      either(
+        display(an(initialization, error)),
+        or(
+          maybe(
+            doNothing,
+            orJust(
+              display(
+                a(formatted, treeGraph, whoseTopMessageIs(labelled(newest)))
+              )
+            )
+          )
+        )
+      )
+    )
+    .run();
+}
 
 program.command("pop").action(async () => {
   const [head, ...rest] = await storage();
@@ -67,33 +91,10 @@ program.command("pop").action(async () => {
   }
 });
 
-program.command("stack").action(displayStack);
-
-async function displayStack() {
-  try {
-    const [head, ...rest] = await storage();
-
-    if (!head) return;
-
-    const data = [`🆕 ${head}`, ...rest];
-    const tree = buildTreeGraph(data);
-    console.log(`\n${tree.toString()}`);
-  } catch (err) {
-    console.error(colors.red("Please, initialize stacker: stacker init"));
-  }
-}
-
 program.parse(process.argv);
 
 if (process.argv.length < 3) {
   displayStack();
-}
-
-function buildTreeGraph(messages) {
-  const [root, ...rest] = messages;
-  return root
-    ? new AsciiTree.AsciiTree(root, buildTreeGraph(rest))
-    : new AsciiTree.AsciiTree();
 }
 
 async function storage() {

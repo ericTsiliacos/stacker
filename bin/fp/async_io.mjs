@@ -2,6 +2,8 @@ import { Result } from "./result.mjs";
 
 const io = f => (...values) => () => f(...values);
 
+const doNothing = () => undefined;
+
 const liftPromise = f => () =>
   f()
     .then(value => Result({ right: value }))
@@ -19,4 +21,4 @@ const AsyncIO = {
 const asynchronously = thunk => (...values) =>
   AsyncIO.chaining(liftPromise(io(thunk)(...values)));
 
-export { AsyncIO, io, asynchronously };
+export { AsyncIO, doNothing, asynchronously };
