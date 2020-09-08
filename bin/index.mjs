@@ -15,7 +15,7 @@ import { error, newest } from "./styles.mjs";
 import { additional, initial } from "./domain/stack.mjs";
 import { get, write } from "./repository.mjs";
 
-program.command("push <message>").action(async message => {
+program.command("push <message>").action(message => {
   asynchronously(get)(json(), { from: fileSystem({ at: filePath() }) })
     .map(additional(message))
     .then(
