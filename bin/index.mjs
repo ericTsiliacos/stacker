@@ -9,7 +9,7 @@ import colors from "colors/safe.js";
 import { a, an } from "./fp/pipe.mjs";
 import { writeFile, readFile } from "fs/promises";
 import { either, or } from "./fp/result.mjs";
-import { fromNonEmptyList, maybe, orJust, forMaybeIndex } from "./fp/maybe.mjs";
+import { nonEmptyList, maybe, orJust, forMaybeIndex } from "./fp/maybe.mjs";
 import { asynchronously, doNothing } from "./fp/async_io.mjs";
 import { initialization, emptyStack } from "./copy.mjs";
 import { error, newest, labelled } from "./styles.mjs";
@@ -52,7 +52,7 @@ program.command("stack").action(displayStack);
 
 function displayStack() {
   asynchronously(get)(json(), { from: fileSystem({ at: filePath() }) })
-    .map(fromNonEmptyList)
+    .map(nonEmptyList)
     .then(
       either(
         display(an(initialization, error)),

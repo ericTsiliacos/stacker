@@ -18,7 +18,7 @@ const maybeMap = f => maybe => maybe.map(f);
 
 const forMaybeIndex = index => obj => Maybe(props(index)(obj));
 
-const fromNonEmptyList = ([head, ...rest]) =>
+const nonEmptyList = ([head, ...rest]) =>
   head ? Maybe([head, ...rest]) : Maybe();
 
-export { Maybe, maybe, orJust, forMaybeIndex, maybeMap, fromNonEmptyList };
+export { Maybe, maybe, orJust, forMaybeIndex, maybeMap, nonEmptyList };
