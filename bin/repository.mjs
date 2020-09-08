@@ -1,8 +1,8 @@
-import { pipe } from "./fp/pipe.mjs";
+import { an } from "./fp/pipe.mjs";
 
 const get = ({ decode }, { from: { read } }) => read().then(decode);
 
-const write = (transform, { encode }, { to: { write } }) =>
-  pipe(transform, encode, write);
+const write = ({ encode: encoded }, { to: { write: writer } }) =>
+  an(encoded, writer);
 
 export { get, write };

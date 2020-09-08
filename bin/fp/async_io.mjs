@@ -10,6 +10,7 @@ const liftPromise = f => () =>
 const AsyncIO = {
   chaining: thunk => ({
     then: f => AsyncIO.chaining(() => thunk().then(value => f(value))),
+    map: f => AsyncIO.chaining(() => thunk().then(value => value.map(f))),
     run: () => thunk(),
   }),
   of: thunk => AsyncIO.chaining(thunk),

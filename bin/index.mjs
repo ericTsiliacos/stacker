@@ -17,24 +17,21 @@ import { get, write } from "./repository.mjs";
 
 program.command("push <message>").action(async message => {
   asynchronously(get)(json(), { from: fileSystem({ at: filePath() }) })
+    .map(additional(message))
     .then(
       either(
         display(an(initialization, error)),
-        or(
-          write(additional(message), json(), {
-            to: fileSystem({ at: filePath() }),
-          })
-        )
+        or(write(json(), { to: fileSystem({ at: filePath() }) }))
       )
     )
     .run();
 });
 
-const reset = write(initial, json(), { to: fileSystem({ at: filePath() }) });
+const resetTo = write(json(), { to: fileSystem({ at: filePath() }) });
 
-program.command("init").action(reset);
+program.command("init").action(() => resetTo(initial()));
 
-program.command("clear").action(reset);
+program.command("clear").action(() => resetTo(initial()));
 
 program.command("peek").action(() =>
   asynchronously(get)(json(), { from: fileSystem({ at: filePath() }) })
