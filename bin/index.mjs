@@ -56,14 +56,10 @@ function displayStack() {
     .then(
       either(
         display(an(initialization, error)),
-        or(
-          maybe(
-            doNothing,
-            orJust(
-              display(
-                a(formatted, treeGraph, whoseTopMessageIs(labelled(newest)))
-              )
-            )
+        or(maybe)(
+          doNothing,
+          orJust(display)(
+            a(formatted, treeGraph, whoseTopMessageIs(labelled(newest)))
           )
         )
       )
