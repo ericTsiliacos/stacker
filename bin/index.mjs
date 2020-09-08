@@ -6,7 +6,7 @@ import json from "./adapters/json.mjs";
 import fileSystem from "./adapters/fileSystem.mjs";
 import display from "./adapters/display.mjs";
 import colors from "colors/safe.js";
-import { a, an } from "./fp/pipe.mjs";
+import { compose, an } from "./fp/pipe.mjs";
 import { writeFile, readFile } from "fs/promises";
 import { either, or } from "./fp/result.mjs";
 import { nonEmptyList, maybe, orJust, forMaybeIndex } from "./fp/maybe.mjs";
@@ -58,7 +58,7 @@ function displayStack() {
         display(an(initialization, error)),
         or(maybe)(
           doNothing,
-          orJust(display)`\n${a(
+          orJust(display)`\n${compose(
             formatted,
             treeGraph,
             whoseTopMessageIs(labelled(newest))

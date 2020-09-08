@@ -1,15 +1,12 @@
 import identity from "./identity.mjs";
 
-const compose = (g, f) => x => g(f(x));
-
 const pipe = (...xs) => x =>
-  xs.reduce((accu, curr) => compose(curr, accu), identity)(x);
+  xs.reduce((accu, curr) => y => curr(accu(y)), identity)(x);
 
-const a = (...xs) => x =>
-  xs.reduce((accu, curr) => compose(accu, curr), identity)(x);
+const compose = (...xs) => x =>
+  xs.reduce((accu, curr) => y => accu(curr(y)), identity)(x);
 
 const an = pipe;
-
 const into = identity;
 
-export { pipe, compose, a, an, into };
+export { pipe, compose, an, into };
