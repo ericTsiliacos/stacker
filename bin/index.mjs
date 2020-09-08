@@ -6,7 +6,7 @@ import json from "./adapters/json.mjs";
 import fileSystem from "./adapters/fileSystem.mjs";
 import display from "./adapters/display.mjs";
 import { writeFile, readFile } from "fs/promises";
-import { mapResult, either, or } from "./fp/result.mjs";
+import { either, or } from "./fp/result.mjs";
 import { maybe, orJust, forMaybeIndex } from "./fp/maybe.mjs";
 import { asynchronously } from "./fp/async_io.mjs";
 import { an } from "./fp/pipe.mjs";
@@ -35,7 +35,7 @@ program.command("clear").action(() => resetTo(initial()));
 
 program.command("peek").action(() =>
   asynchronously(get)(json(), { from: fileSystem({ at: filePath() }) })
-    .then(mapResult(forMaybeIndex(0)))
+    .map(forMaybeIndex(0))
     .then(
       display(
         either(
