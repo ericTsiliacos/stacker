@@ -4,13 +4,14 @@ import program from "commander";
 import AsciiTree from "oo-ascii-tree";
 import json from "./adapters/json.mjs";
 import fileSystem from "./adapters/fileSystem.mjs";
+import display from "./adapters/display.mjs";
 import { writeFile, readFile } from "fs/promises";
 import { mapResult, either, or } from "./fp/result.mjs";
 import { maybe, orJust, forMaybeIndex } from "./fp/maybe.mjs";
-import { asynchronously, io } from "./fp/async_io.mjs";
-import { pipe, into, an } from "./fp/pipe.mjs";
+import { asynchronously } from "./fp/async_io.mjs";
+import { an } from "./fp/pipe.mjs";
 import { initialization, emptyStack } from "./copy.mjs";
-import { error, latest } from "./styles.mjs";
+import { error, newest } from "./styles.mjs";
 import { additional, initial } from "./domain/stack.mjs";
 import { get, write } from "./repository.mjs";
 
@@ -18,7 +19,7 @@ program.command("push <message>").action(async message => {
   asynchronously(get)(json(), { from: fileSystem({ at: filePath() }) })
     .then(
       either(
-        pipe(initialization, error, into(console.log)),
+        display(an(initialization, error)),
         or(
           write(additional(message), json(), {
             to: fileSystem({ at: filePath() }),
@@ -39,12 +40,11 @@ program.command("peek").action(() =>
   asynchronously(get)(json(), { from: fileSystem({ at: filePath() }) })
     .then(mapResult(forMaybeIndex(0)))
     .then(
-      pipe(
+      display(
         either(
           an(initialization, error),
-          or(maybe(an(emptyStack, error), orJust(latest)))
-        ),
-        into(console.log)
+          or(maybe(an(emptyStack, error), orJust(newest)))
+        )
       )
     )
     .run()

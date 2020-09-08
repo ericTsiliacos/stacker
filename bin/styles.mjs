@@ -2,6 +2,6 @@ import colors from "colors/safe.js";
 
 const error = colors.red;
 
-const latest = value => `🆕 ${value}`;
+const newest = value => `🆕 ${value}`;
 
-export { error, latest };
+export { error, newest };
