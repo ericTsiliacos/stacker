@@ -1,5 +1,4 @@
 import { Result } from "./result.mjs";
-import { promisify } from "util";
 
 const io = f => (...values) => () => f(...values);
 
