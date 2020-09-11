@@ -9,7 +9,7 @@ program.command("push <message>").action(async message => {
   try {
     const data = await storage();
 
-    await writeFile(storageFileName(), JSON.stringify([message, ...data]));
+    await writeFile(filePath(), JSON.stringify([message, ...data]));
   } catch (error) {
     console.log(error);
   }
@@ -33,7 +33,7 @@ program.command("pop").action(async () => {
   if (!head) return console.log(colors.red("Nothing to pop!"));
 
   try {
-    await writeFile(storageFileName(), JSON.stringify(rest));
+    await writeFile(filePath(), JSON.stringify(rest));
     console.log(`✅ ${head}`);
 
     if (rest.length === 0) {
@@ -53,9 +53,7 @@ async function displayStack() {
   try {
     const [head, ...rest] = await storage();
 
-    if (!head) return;
-
-    console.log(`\n${graph([`🆕 ${head}`, ...rest])}`);
+    head && console.log(`\n${graph([`🆕 ${head}`, ...rest])}`);
   } catch (err) {
     console.error(colors.red("Please, initialize stacker: stacker init"));
   }
@@ -68,15 +66,15 @@ if (process.argv.length < 3) {
 }
 
 async function reset() {
-  await writeFile(storageFileName(), JSON.stringify([]));
+  await writeFile(filePath(), JSON.stringify([]));
 }
 
 async function storage() {
-  const data = await readFile(storageFileName());
+  const data = await readFile(filePath());
   return JSON.parse(data);
 }
 
-function storageFileName() {
+function filePath() {
   return `${cwd()}/.stacker.json`;
 }
 
