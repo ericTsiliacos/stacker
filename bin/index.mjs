@@ -3,7 +3,7 @@
 import program from "commander";
 import { writeFile, readFile } from "fs/promises";
 import colors from "colors/safe.js";
-import AsciiTree from "oo-ascii-tree";
+import graph from "./graph.mjs";
 
 program.command("push <message>").action(async message => {
   try {
@@ -55,9 +55,7 @@ async function displayStack() {
 
     if (!head) return;
 
-    const data = [`🆕 ${head}`, ...rest];
-    const tree = buildTreeGraph(data);
-    console.log(`\n${tree.toString()}`);
+    console.log(`\n${graph([`🆕 ${head}`, ...rest])}`);
   } catch (err) {
     console.error(colors.red("Please, initialize stacker: stacker init"));
   }
@@ -67,13 +65,6 @@ program.parse(process.argv);
 
 if (process.argv.length < 3) {
   displayStack();
-}
-
-function buildTreeGraph(messages) {
-  const [root, ...rest] = messages;
-  return root
-    ? new AsciiTree.AsciiTree(root, buildTreeGraph(rest))
-    : new AsciiTree.AsciiTree();
 }
 
 async function reset() {
