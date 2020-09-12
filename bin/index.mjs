@@ -11,7 +11,7 @@ program.command("push <message>").action(async message => {
 
     await writeFile(filePath(), JSON.stringify([message, ...data]));
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 });
 
@@ -20,17 +20,21 @@ program.command("init").action(reset);
 program.command("clear").action(reset);
 
 program.command("peek").action(async () => {
-  const [head] = await storage();
+  try {
+    const [head] = await storage();
 
-  if (!head) return console.log(colors.red("Nothing to see here!"));
+    if (!head) return console.log(colors.red("Nothing to see here!"));
 
-  console.log(`🆕 ${head}`);
+    console.log(`${current(head)}`);
+  } catch (err) {
+    console.error(initialization());
+  }
 });
 
 program.command("pop").action(async () => {
   const [head, ...rest] = await storage();
 
-  if (!head) return console.log(colors.red("Nothing to pop!"));
+  if (!head) return console.log(finished());
 
   try {
     await writeFile(filePath(), JSON.stringify(rest));
@@ -39,8 +43,12 @@ program.command("pop").action(async () => {
     if (rest.length === 0) {
       console.log(`\n🎉 ${colors.rainbow("All done!")} 🎉`);
     } else {
-      const [next] = rest;
-      console.log(`\n⏭️  ${next}`);
+      const [next, ...ending] = rest;
+      if (ending.length === 0) {
+        console.log(`\n${target(next)}`);
+      } else {
+        console.log(`\n⏭️  ${next}`);
+      }
     }
   } catch (err) {
     console.error(err);
@@ -53,9 +61,11 @@ async function displayStack() {
   try {
     const [head, ...rest] = await storage();
 
-    head && console.log(`\n${graph([`🆕 ${head}`, ...rest])}`);
+    console.log(
+      head ? `\n${graph([`${current(head)}`, ...label(rest)])}` : finished()
+    );
   } catch (err) {
-    console.error(colors.red("Please, initialize stacker: stacker init"));
+    console.error(initialization());
   }
 }
 
@@ -80,4 +90,29 @@ function filePath() {
 
 function cwd() {
   return process.cwd();
+}
+
+function initialization() {
+  return colors.red("Please, initialize stacker: stacker init");
+}
+
+function current(message) {
+  return `➡️  ${message}`;
+}
+
+function label(messages) {
+  const [last, ...rest] = messages.reverse();
+  if (last) {
+    return [target(last), ...rest].reverse();
+  } else {
+    return [];
+  }
+}
+
+function target(value) {
+  return `🎯 ${value}`;
+}
+
+function finished() {
+  return "🏁";
 }
