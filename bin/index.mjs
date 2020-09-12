@@ -11,7 +11,7 @@ program.command("push <message>").action(async message => {
 
     await writeFile(filePath(), JSON.stringify([message, ...data]));
   } catch (error) {
-    console.error(error);
+    console.error(initialization());
   }
 });
 
@@ -21,11 +21,11 @@ program.command("clear").action(reset);
 
 program.command("peek").action(async () => {
   try {
-    const [head] = await storage();
+    const [head, ...rest] = await storage();
 
     if (!head) return console.log(colors.red("Nothing to see here!"));
 
-    console.log(`${current(head)}`);
+    console.log(rest.length === 0 ? `${target(head)}` : `${current(head)}`);
   } catch (err) {
     console.error(initialization());
   }
