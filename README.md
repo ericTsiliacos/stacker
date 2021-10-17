@@ -41,6 +41,13 @@ As you complete tasks, pop them off the stack to see the next one.
 $ stacker pop
 ```
 
+If you are using Stacker to pre-write commit messages, you can use the current task as a git commit message 
+using the `commit` command (this will also pop the task).
+
+```shell
+$ git commit -m (stacker commit)
+```
+
 You can always be reminded of what you're currently working on.
 
 
