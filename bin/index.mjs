@@ -19,6 +19,24 @@ program.command("init").action(reset);
 
 program.command("clear").action(reset);
 
+program.command("commit").action(async () => {
+  const [head, ...rest] = await storage();
+
+  if (!head) {
+    console.error("❌ Nothing on the stack")
+    process.exitCode = 1;
+    return
+  }
+
+  try {
+    await writeFile(filePath(), JSON.stringify(rest));
+    console.log(`${head}`);
+  } catch (err) {
+    console.error(err);
+    process.exitCode = 2;
+  }
+});
+
 program.command("peek").action(async () => {
   try {
     const [head, ...rest] = await storage();
